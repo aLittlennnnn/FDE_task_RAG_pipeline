@@ -1,17 +1,3 @@
-"""
-PDF text extraction and chunking.
-
-Considerations:
-- We use pdfminer.six for robust text extraction (handles ligatures, encoding).
-- Chunking uses a sentence-aware sliding window:
-    * Split into sentences first (regex-based, no NLTK dependency).
-    * Group sentences into chunks of ~`chunk_size` characters with `overlap`
-      characters of backward overlap to preserve context across chunk borders.
-    * Very short chunks (<50 chars) are skipped — they are usually headers /
-      page numbers that add noise.
-- Metadata stored per chunk: source filename, page number, chunk index.
-"""
-
 import re
 import io
 from pathlib import Path

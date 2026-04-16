@@ -42,7 +42,7 @@ A Retrieval-Augmented Generation (RAG) backend built with **FastAPI** and the **
   User Query
         │
         ▼
-  ┌─────────────────────────────────────────────┐
+  ┌──────────────────────────────────────────────┐
   │  Intent Detector                             │
   │  1. regex heuristics (fast, no API call)     │
   │  2. Mistral classifier (if inconclusive)     │
@@ -99,11 +99,21 @@ A Retrieval-Augmented Generation (RAG) backend built with **FastAPI** and the **
 ### Embedding & Vector Store (no third-party DB)
 Embeddings are obtained from Mistral's `mistral-embed` model in batches of 16. All vectors are stored in a **numpy float32 matrix**, L2-normalised at insertion so cosine similarity reduces to a fast dot product: `scores = matrix @ query_vec`. Top-k selection uses `np.argpartition` for O(N) complexity vs O(N log N) for a full sort.
 
-### BM25 (no external library)
+### BM25 vs Cosine Similarity — and why we use both
+
+Both methods rank chunks by relevance to a query, but from completely different angles.
+
+**BM25 is a keyword matching algorithm.** It asks: *do the exact words in the query appear in this chunk?* It counts term occurrences, but with two important corrections. First, it saturates term frequency — a word appearing 10 times doesn't make a document 10× more relevant than one where it appears twice. Second, it penalises long documents, since a long chunk has more chances to contain any word by sheer size. It also rewards rare words via IDF: if "transformer" appears in only 2 of 100 chunks, a match on it is far more informative than a match on "the". The weakness is that it is purely lexical — it has no idea that "automobile" and "car" mean the same thing. If the query says "car" and the document says "automobile", BM25 scores it zero.
+
+**Cosine similarity is a semantic matching algorithm.** It asks: *are the meanings of the query and this chunk similar?* Both are first converted to dense embedding vectors (via `mistral-embed`) where nearby vectors mean similar meaning. The score is the cosine of the angle between them — 1 means identical direction, 0 means unrelated. Because the model learned from massive text, "automobile" and "car" end up close in this vector space. The weakness is that it can be blurry — it captures general topic similarity but can miss precise keyword or numerical matches.
+
+**That is exactly why we use both.** BM25 catches exact keyword matches and technical terms; cosine similarity catches paraphrased or conceptually related content. Reciprocal Rank Fusion then merges the two ranked lists: a chunk that ranks highly in *both* gets boosted to the top, giving consistently better retrieval than either method alone.
+
+### BM25 Implementation (no external library)
 Classic **Okapi BM25** (k1=1.5, b=0.75) is implemented from scratch with an inverted index. Tokenisation: lowercase, strip punctuation, remove stopwords. IDF values are lazily cached and cleared on index mutation. On file deletion, the index is rebuilt in-place from remaining chunks (infrequent operation, acceptable cost).
 
 ### Hybrid Search + RRF
-**Reciprocal Rank Fusion** (RRF, k=60) merges semantic and keyword ranked lists without normalising scores across two different distributions — a common problem with score-based fusion. Each retrieval set uses 2×top_k candidates before fusion, then the final top-k is returned.
+**Reciprocal Rank Fusion** (RRF, k=60) merges the two ranked lists without normalising scores across two different score distributions — a common problem with score-based fusion. Each retrieval set uses 2×top_k candidates before fusion, then the final top-k is returned.
 
 ### Query Transformation
 Step 1 (Rewrite): Mistral rewrites the query to be explicit and self-contained (expands pronouns, acronyms, adds domain keywords). Step 2 (HyDE): Mistral generates a short hypothetical document excerpt. This is appended to the rewritten query before embedding, pulling the query vector closer to the space of actual document vectors.

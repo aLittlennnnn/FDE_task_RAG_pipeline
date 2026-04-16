@@ -1,15 +1,3 @@
-"""
-/ingest endpoint — upload one or more PDF files for processing.
-
-Flow:
-    1. Validate files are PDFs (by content-type and magic bytes).
-    2. Extract text and chunk each PDF.
-    3. Embed all chunks (batched Mistral API call).
-    4. Add embeddings to in-memory VectorStore.
-    5. Add chunk texts to BM25 index.
-    6. Return ingestion summary.
-"""
-
 from __future__ import annotations
 
 import io

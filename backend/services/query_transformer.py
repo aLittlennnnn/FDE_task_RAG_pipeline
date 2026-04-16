@@ -1,22 +1,3 @@
-"""
-Query transformation to improve retrieval quality.
-
-Two strategies applied in sequence:
-
-1. Query rewriting
-   Ask the LLM to rephrase the question in a way that is more explicit and
-   self-contained (removes pronouns, expands acronyms, adds context).
-
-2. HyDE (Hypothetical Document Embeddings — Gao et al., 2022)
-   Generate a short hypothetical answer to the question.  We embed THAT text
-   instead of the raw question, because its vocabulary will better match the
-   actual document chunks (documents answer questions; queries ask them).
-
-The final search string is: rewritten_query + " " + hypothetical_answer.
-This hybrid gives both lexical precision (BM25 benefits from keywords) and
-semantic alignment (cosine search benefits from the topic vocabulary).
-"""
-
 from __future__ import annotations
 
 import os

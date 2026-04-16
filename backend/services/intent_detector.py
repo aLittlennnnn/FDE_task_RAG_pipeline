@@ -1,6 +1,4 @@
 """
-Intent detection and query refusal policies.
-
 Two-stage detection:
     1. Fast heuristic: if the message is a short greeting / small-talk phrase
        we classify immediately without an LLM call.

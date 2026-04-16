@@ -1,10 +1,3 @@
-"""
-Embedding client for Mistral's mistral-embed model.
-
-Batches requests to stay under the API token limit and returns
-numpy float32 arrays for efficient cosine similarity computation.
-"""
-
 import os
 import httpx
 import numpy as np

@@ -1,5 +1,5 @@
 """
-BM25 keyword search — implemented from scratch, no external libraries.
+BM25
 
 Algorithm:
     BM25 Okapi (Robertson et al., 1994) with standard hyperparameters:
@@ -50,7 +50,6 @@ def _tokenise(text: str) -> list[str]:
 # ------------------------------------------------------------------
 
 class BM25Index:
-    """Thread-safe BM25 index over chunk texts."""
 
     def __init__(self, k1: float = 1.5, b: float = 0.75) -> None:
         self.k1 = k1
