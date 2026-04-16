@@ -3,7 +3,9 @@ from __future__ import annotations
 import os
 import httpx
 
-MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "CF2DvjloshzasO0mtBkPj44fo2nXDwPk")
+MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
+if not MISTRAL_API_KEY:
+    raise EnvironmentError("MISTRAL_API_KEY is not set. Run: export MISTRAL_API_KEY=your_key_here")
 CHAT_URL = "https://api.mistral.ai/v1/chat/completions"
 TRANSFORM_MODEL = "mistral-small-latest"
 

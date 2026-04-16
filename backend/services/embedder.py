@@ -3,7 +3,9 @@ import httpx
 import numpy as np
 from typing import Sequence
 
-MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "CF2DvjloshzasO0mtBkPj44fo2nXDwPk")
+MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
+if not MISTRAL_API_KEY:
+    raise EnvironmentError("MISTRAL_API_KEY is not set. Run: export MISTRAL_API_KEY=your_key_here")
 EMBED_MODEL = "mistral-embed"
 EMBED_URL = "https://api.mistral.ai/v1/embeddings"
 BATCH_SIZE = 16          # Mistral allows up to 16k tokens per request; keep batches small
