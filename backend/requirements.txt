@@ -1,0 +1,19 @@
+# Web framework
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9       # required for UploadFile
+
+# PDF extraction
+pdfminer.six>=20221105
+
+# Numerical computation (vectors / cosine similarity)
+numpy>=1.26.0
+
+# HTTP client (Mistral API calls)
+httpx>=0.27.0
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# Pydantic (bundled with FastAPI but pinned for stability)
+pydantic>=2.7.0
